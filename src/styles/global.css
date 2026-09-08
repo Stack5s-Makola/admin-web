@@ -1,0 +1,492 @@
+/*
+ * Tokens taken from the Figma admin screens (eyeballed from the exported frames —
+ * replace with the exact values from Figma's Selection colors panel when available).
+ */
+
+:root {
+  --color-ink: #141414;
+  --color-sidebar: #1f1f1f;
+  --color-sidebar-hover: #2b2b2b;
+  --color-accent: #c9f03c;
+  --color-accent-hover: #d8f95f;
+  --color-accent-ink: #1f1f1f;
+  --color-canvas: #f6eee0;
+  --color-surface: #ffffff;
+  --color-border: #e4e2dc;
+  --color-text: #1f1f1f;
+  --color-muted: #7a7a7a;
+  --color-error: #b42318;
+  --color-success: #10693f;
+  --color-brand-green: #0a6b3e;
+  --color-brand-panel: #808989;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.page-loader {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  color: var(--color-muted);
+}
+
+/* ----------------------------- Logo ------------------------------ */
+
+.logo {
+  display: block;
+  height: 26px;
+  width: auto;
+}
+
+/* --------------------------- Auth shell -------------------------- */
+
+.auth-layout {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--color-canvas);
+}
+
+.auth-card {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  width: 100%;
+  max-width: 840px;
+  min-height: 440px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 24px 60px rgba(31, 31, 31, 0.14);
+}
+
+.auth-brand {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 32px;
+  background: var(--color-brand-panel);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+/* Gradient artwork exported from the Figma design. */
+.auth-brand__artwork {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 68%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.auth-brand__text {
+  position: relative;
+}
+
+.auth-brand__name {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.auth-brand__role {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+.auth-panel {
+  display: flex;
+  align-items: center;
+  padding: 40px 36px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.auth-form__header {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.auth-form__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.auth-form__hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.auth-form__link {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.auth-form__link:hover {
+  color: var(--color-text);
+}
+
+.auth-form__link--inline {
+  align-self: flex-end;
+  margin-top: -8px;
+}
+
+.auth-form__footnote {
+  margin: 0;
+  font-size: 12px;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--color-text);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------------------------- Forms ------------------------------ */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field__label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-field__control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.form-field__control:focus-within {
+  border-color: var(--color-ink);
+}
+
+.form-field__control--error {
+  border-color: var(--color-error);
+}
+
+.form-field__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--color-muted);
+}
+
+.form-field__input {
+  flex: 1;
+  padding: 11px 0;
+  border: 0;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  color: inherit;
+}
+
+.form-field__input::placeholder {
+  color: #b3b3b3;
+}
+
+.form-field__error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-error);
+}
+
+.alert {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.alert--error {
+  background: #fdf1f0;
+  color: var(--color-error);
+}
+
+.alert--success {
+  background: #eef7f1;
+  color: var(--color-success);
+}
+
+/* ----------------------------- OTP ------------------------------- */
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.otp-input {
+  width: 42px;
+  height: 46px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: inherit;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: var(--color-ink);
+}
+
+/* ---------------------------- Buttons ---------------------------- */
+
+.button {
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button--dark {
+  background: var(--color-ink);
+  color: #ffffff;
+}
+
+.button--dark:hover:not(:disabled) {
+  background: #000000;
+}
+
+.button--accent {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.button--accent:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+}
+
+.button--block {
+  width: 100%;
+}
+
+/* --------------------------- Admin shell -------------------------- */
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  gap: 16px;
+  min-height: 100vh;
+  padding: 16px;
+  background: var(--color-canvas);
+}
+
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-sidebar);
+  color: #ffffff;
+}
+
+.admin-sidebar__brand {
+  padding: 4px 8px 20px;
+}
+
+.admin-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  color: #e8e8e8;
+  text-decoration: none;
+}
+
+.admin-nav-link:hover {
+  background: var(--color-sidebar-hover);
+}
+
+.admin-nav-link__icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.admin-nav-link--active {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 600;
+}
+
+.admin-nav-link--active:hover {
+  background: var(--color-accent-hover);
+}
+
+.admin-account {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-account__card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(115deg, #e79b23 0%, #7b2f6d 55%, #4b2350 100%);
+}
+
+.admin-account__avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-sidebar);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-account__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-content {
+  padding: 28px;
+  border-radius: var(--radius-md);
+  background: #fbf6ec;
+}
+
+.placeholder {
+  padding: 24px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.placeholder__title {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.placeholder__note {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+/* --------------------------- Responsive --------------------------- */
+
+@media (max-width: 860px) {
+  .auth-card {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+
+  .auth-brand {
+    min-height: 180px;
+  }
+
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    overflow-x: auto;
+  }
+
+  .admin-sidebar__brand {
+    padding: 0 8px;
+  }
+
+  .admin-sidebar__nav {
+    flex-direction: row;
+  }
+
+  .admin-account {
+    margin: 0 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .admin-account__card {
+    display: none;
+  }
+}
