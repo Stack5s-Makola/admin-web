@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { Avatar } from '../components/Avatar';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { paths } from '../routes/paths';
@@ -27,12 +28,6 @@ function NavIcon({ name }: { name: (typeof navItems)[number]['icon'] }) {
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
-  const initials = (user?.name ?? 'A')
-    .split(' ')
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
 
   return (
     <div className="admin-layout">
@@ -56,17 +51,22 @@ export function AdminLayout() {
           ))}
         </nav>
 
+        {/*
+          Figma: card 252 x 106 (radius 15) with the marble artwork, and a 76px
+          avatar straddling its top edge - half in, half out.
+        */}
         <div className="admin-account">
           <div className="admin-account__card">
-            <span className="admin-account__avatar" aria-hidden="true">
-              {initials}
-            </span>
-            <span className="admin-account__name">{user?.name ?? 'Administrator'}</span>
+            <Avatar src={user?.profileImage} name={user?.name ?? 'Administrator'} />
+            <button
+              type="button"
+              className="button button--accent button--block admin-account__logout"
+              onClick={logout}
+            >
+              <Icon className="admin-account__logout-icon" icon={logoutIcon} width={18} aria-hidden="true" />
+              Logout
+            </button>
           </div>
-          <button type="button" className="button button--accent button--block" onClick={logout}>
-            <Icon className="admin-account__logout-icon" icon={logoutIcon} width={18} aria-hidden="true" />
-            Logout
-          </button>
         </div>
       </aside>
 

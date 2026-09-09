@@ -329,7 +329,7 @@ body {
 
 .admin-layout {
   display: grid;
-  grid-template-columns: 232px 1fr;
+  grid-template-columns: 308px 1fr;
   gap: 16px;
   min-height: 100vh;
   padding: 16px;
@@ -339,7 +339,7 @@ body {
 .admin-sidebar {
   display: flex;
   flex-direction: column;
-  padding: 20px 14px;
+  padding: 24px 28px;
   border-radius: var(--radius-md);
   background: var(--color-sidebar);
   color: #ffffff;
@@ -384,48 +384,61 @@ body {
   background: var(--color-accent-hover);
 }
 
+/*
+ * Figma: sidebar 308 wide, account card 252 x 106 (radius 15) filled with the
+ * marble artwork, 76px avatar centred on the card's top edge (half overlapping).
+ */
 .admin-account {
+  --avatar-size: 76px;
   margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding-top: calc(var(--avatar-size) / 2);
 }
 
 .admin-account__card {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(115deg, #e79b23 0%, #7b2f6d 55%, #4b2350 100%);
+  align-items: flex-end;
+  min-height: 106px;
+  padding: calc(var(--avatar-size) / 2 + 6px) 14px 14px;
+  border-radius: 15px;
+  background: url('../assets/account-card-bg.png') center / cover no-repeat;
 }
 
-.admin-account__avatar {
+.avatar {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  flex: none;
+  border-radius: 50%;
+  border: 5px solid var(--color-sidebar);
+  object-fit: cover;
+  background: #d9d9d9;
+}
+
+.avatar--fallback {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
-  flex: none;
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-sidebar);
-  font-size: 12px;
+  font-size: calc(var(--avatar-size) * 0.32);
   font-weight: 700;
+  color: var(--color-sidebar);
+  background: var(--color-accent);
 }
 
-.admin-account__name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.admin-account__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .admin-account__logout-icon {
   flex: none;
-  margin-right: 4px;
-  vertical-align: -3px;
 }
 
 .admin-content {
@@ -485,12 +498,21 @@ body {
   }
 
   .admin-account {
+    --avatar-size: 40px;
     margin: 0 0 0 auto;
-    flex-direction: row;
-    align-items: center;
+    padding-top: 0;
   }
 
   .admin-account__card {
-    display: none;
+    min-height: 0;
+    padding: 6px 8px 6px calc(var(--avatar-size) + 12px);
+    background-size: cover;
+  }
+
+  .avatar {
+    top: 50%;
+    left: 6px;
+    transform: translateY(-50%);
+    border-width: 3px;
   }
 }
