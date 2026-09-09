@@ -371,8 +371,6 @@ body {
 }
 
 .admin-nav-link__icon {
-  width: 16px;
-  height: 16px;
   flex: none;
 }
 
@@ -422,6 +420,12 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.admin-account__logout-icon {
+  flex: none;
+  margin-right: 4px;
+  vertical-align: -3px;
 }
 
 .admin-content {
