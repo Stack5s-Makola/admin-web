@@ -1,4 +1,4 @@
-import wordmark from '../assets/logo-wordmark.png';
+import wordmark from '../assets/logo makola.svg';
 
 /**
  * Makola wordmark.

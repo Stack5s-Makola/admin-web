@@ -58,8 +58,10 @@ body {
 
 .logo {
   display: block;
-  height: 26px;
-  width: auto;
+  width: 153px;
+  height: 61px;
+  opacity: 1;
+  transform: rotate(0deg);
 }
 
 /* --------------------------- Auth shell -------------------------- */
@@ -72,14 +74,18 @@ body {
   background: var(--color-canvas);
 }
 
+/*
+ * Figma frame: brand panel 890 wide, form panel 607 x 842, radius 20.
+ * Ratio kept exactly; the whole card scales with the viewport.
+ */
 .auth-card {
+  --card-w: min(1497px, 96vw, calc((92vh - 48px) * 1.7779));
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  width: 100%;
-  max-width: 840px;
-  min-height: 440px;
+  grid-template-columns: 890fr 607fr;
+  width: var(--card-w);
+  aspect-ratio: 1497 / 842;
   overflow: hidden;
-  border-radius: var(--radius-lg);
+  border-radius: 20px;
   background: var(--color-surface);
   box-shadow: 0 24px 60px rgba(31, 31, 31, 0.14);
 }
@@ -123,50 +129,65 @@ body {
   opacity: 0.95;
 }
 
+/*
+ * Everything inside the form panel is expressed as a share of the card width
+ * (--card-w), so the screen matches the Figma frame at any size.
+ * Reference: card 1497 wide -> form panel 607, content column 505,
+ * side padding 51, button 87 tall, inputs ~60.
+ */
 .auth-panel {
   display: flex;
   align-items: center;
-  padding: 40px 36px;
+  justify-content: center;
+  padding: 0 calc(var(--card-w) * 0.0341); /* 51 / 1497 */
+  overflow-y: auto;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: calc(var(--card-w) * 0.0187); /* 28 */
   width: 100%;
+  max-width: calc(var(--card-w) * 0.3373); /* 505 */
 }
 
 .auth-form__header {
   text-align: center;
-  margin-bottom: 4px;
+  margin-bottom: calc(var(--card-w) * 0.0107);
 }
 
 .auth-form__title {
   margin: 0;
-  font-size: 18px;
+  font-size: max(18px, calc(var(--card-w) * 0.0174)); /* 26 */
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .auth-form__hint {
-  margin: 6px 0 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-muted);
+  margin: calc(var(--card-w) * 0.0053) 0 0;
+  font-size: max(12px, calc(var(--card-w) * 0.0094)); /* 14 */
+  font-weight: 600;
+  line-height: 1.45;
+  color: #5f6368;
 }
 
 .auth-form__link {
-  font-size: 12px;
-  color: var(--color-muted);
-  text-decoration: none;
+  font-size: max(11px, calc(var(--card-w) * 0.0087)); /* 13 */
+  color: #5f6368;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .auth-form__link:hover {
   color: var(--color-text);
 }
 
+/* "or forgot password?" sits tight under the password field,
+   with a large gap before the button (per the frame). */
 .auth-form__link--inline {
   align-self: flex-end;
-  margin-top: -8px;
+  margin-top: calc(var(--card-w) * -0.0127);
+  margin-bottom: calc(var(--card-w) * 0.0187);
 }
 
 .auth-form__footnote {
@@ -195,18 +216,23 @@ body {
   gap: 6px;
 }
 
+.form-field {
+  gap: calc(var(--card-w, 900px) * 0.0067);
+}
+
 .form-field__label {
-  font-size: 13px;
+  font-size: max(13px, calc(var(--card-w, 900px) * 0.0107)); /* 16 */
   font-weight: 700;
 }
 
 .form-field__control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  gap: calc(var(--card-w, 900px) * 0.0094);
+  min-height: max(44px, calc(var(--card-w, 900px) * 0.04)); /* 60 */
+  padding: 0 calc(var(--card-w, 900px) * 0.0127);
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
   background: var(--color-surface);
 }
 
@@ -219,18 +245,19 @@ body {
 }
 
 .form-field__icon {
-  width: 16px;
-  height: 16px;
+  width: max(18px, calc(var(--card-w, 900px) * 0.0147));
+  height: max(18px, calc(var(--card-w, 900px) * 0.0147));
   flex: none;
-  color: var(--color-muted);
+  color: #9aa0a6;
 }
 
 .form-field__input {
   flex: 1;
-  padding: 11px 0;
+  min-width: 0;
+  padding: 0;
   border: 0;
   outline: none;
-  font-size: 14px;
+  font-size: max(14px, calc(var(--card-w, 900px) * 0.0107));
   background: transparent;
   color: inherit;
 }
@@ -298,6 +325,14 @@ body {
   cursor: pointer;
 }
 
+/* Login / Verify OTP button, sized from the frame: 505 x 87, radius 16. */
+.auth-form .button {
+  min-height: max(48px, calc(var(--card-w) * 0.0581));
+  border-radius: 16px;
+  font-size: max(15px, calc(var(--card-w) * 0.0134));
+  font-weight: 700;
+}
+
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -346,6 +381,8 @@ body {
 }
 
 .admin-sidebar__brand {
+  display: flex;
+  justify-content: center;
   padding: 4px 8px 20px;
 }
 
@@ -468,14 +505,25 @@ body {
 
 /* --------------------------- Responsive --------------------------- */
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .auth-card {
+    --card-w: min(1200px, 96vw);
     grid-template-columns: 1fr;
-    max-width: 420px;
+    width: min(460px, 96vw);
+    aspect-ratio: auto;
   }
 
   .auth-brand {
     min-height: 180px;
+  }
+
+  .auth-panel {
+    padding: 32px 28px;
+  }
+
+  .auth-form {
+    max-width: none;
+    gap: 18px;
   }
 
   .admin-layout {
