@@ -10,7 +10,8 @@ export const config = {
   apiBaseUrl: rawBaseUrl.replace(/\/+$/, ''),
   /** All backend routes are prefixed with /api (architecture doc, section 44). */
   apiPrefix: '/api',
-  requestTimeoutMs: 15000,
+  /** Render + Neon both cold-start; 15s was not enough for the first call. */
+  requestTimeoutMs: 30000,
   /**
    * Confirmed with the backend: tokens come back in the response body.
    * Kept as a switch in case this moves to an httpOnly cookie later -

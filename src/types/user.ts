@@ -1,14 +1,14 @@
+/** Roles are UPPERCASE, statuses are lowercase (Admin API contract, §5). */
 export type Role = 'BUYER' | 'SELLER' | 'ADMIN';
+export type UserStatus = 'active' | 'suspended';
 
+/** Exactly the fields the API returns - no password or auth fields. */
 export interface User {
   id: string;
-  name: string;
   email: string;
-  phone?: string;
+  fullName: string;
+  imageUrl: string | null;
   role: Role;
-  /**
-   * Cloudinary URL from the users.profile_image column (architecture doc, section 18).
-   * CONFIRM the JSON key with the backend: profileImage vs profile_image.
-   */
-  profileImage?: string | null;
+  status: UserStatus;
+  createdAt: string;
 }

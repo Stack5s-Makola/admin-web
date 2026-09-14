@@ -8,5 +8,6 @@ export const paths = {
   dashboard: '/dashboard',
   sellers: '/sellers',
   buyers: '/buyers',
-  map: '/map',
+  listings: '/listings',
+  listingsPending: '/listings/pending',
 } as const;

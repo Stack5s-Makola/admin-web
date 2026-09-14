@@ -6,7 +6,7 @@ import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage';
 import { VerifyOtpPage } from '../features/auth/pages/VerifyOtpPage';
 import { BuyersPage } from '../features/buyers/pages/BuyersPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
-import { MapPage } from '../features/map/pages/MapPage';
+import { ListingsPage } from '../features/listings/pages/ListingsPage';
 import { SellersPage } from '../features/sellers/pages/SellersPage';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -32,7 +32,8 @@ export function AppRoutes() {
           <Route path={paths.dashboard} element={<DashboardPage />} />
           <Route path={paths.sellers} element={<SellersPage />} />
           <Route path={paths.buyers} element={<BuyersPage />} />
-          <Route path={paths.map} element={<MapPage />} />
+          <Route path={paths.listings} element={<ListingsPage />} />
+          <Route path={paths.listingsPending} element={<ListingsPage />} />
         </Route>
       </Route>
 
