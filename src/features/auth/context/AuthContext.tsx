@@ -34,9 +34,12 @@ export const AuthContext = createContext<AuthContextValue | undefined>(undefined
 /** Stand-in account used only when VITE_DEV_FAKE_AUTH is on. */
 const DEV_ADMIN: User = {
   id: 'dev-admin',
-  name: 'Dev Admin',
   email: 'dev@makola.local',
+  fullName: 'Dev Admin',
+  imageUrl: null,
   role: 'ADMIN',
+  status: 'active',
+  createdAt: new Date().toISOString(),
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {

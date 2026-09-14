@@ -5,19 +5,19 @@ import { Logo } from '../components/Logo';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { paths } from '../routes/paths';
 
-/** Nav matches the Figma design: Dashboard, Sellers, Buyers, Map. */
+/** Nav matches the Figma design: Dashboard, Sellers, Buyers, listings. */
 const navItems = [
   { to: paths.dashboard, label: 'Dashboard', icon: 'grid' },
   { to: paths.sellers, label: 'Sellers', icon: 'store' },
   { to: paths.buyers, label: 'Buyers', icon: 'users' },
-  { to: paths.map, label: 'Map', icon: 'pin' },
+  { to: paths.listings, label: 'Listings', icon: 'tag' },
 ] as const;
 
 const icons: Record<(typeof navItems)[number]['icon'], string> = {
   grid: 'hugeicons:dashboard-square-03',
   store: 'uil:money-withdraw',
   users: 'ci:users',
-  pin: 'f7:map-pin-ellipse',
+  tag: 'bx:purchase-tag',
 };
 
 const logoutIcon = 'basil:logout-solid';
@@ -57,7 +57,7 @@ export function AdminLayout() {
         */}
         <div className="admin-account">
           <div className="admin-account__card">
-            <Avatar src={user?.profileImage} name={user?.name ?? 'Administrator'} />
+            <Avatar src={user?.imageUrl} name={user?.fullName?? 'Administrator'} />
             <button
               type="button"
               className="button button--accent button--block admin-account__logout"
