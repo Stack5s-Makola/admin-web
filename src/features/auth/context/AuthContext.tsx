@@ -28,12 +28,33 @@ interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+/**
+ * Dev-only bypass: signs in a fake admin so screens can be clicked through
+ * before the API is live. Stripped from production builds by the
+ * `!import.meta.env.PROD` guard below, on top of the env flag itself.
+ */
+const FAKE_AUTH_ENABLED =
+  import.meta.env.VITE_DEV_FAKE_AUTH === 'true' && !import.meta.env.PROD;
+
+const FAKE_ADMIN_USER: User = {
+  id: 'dev-fake-admin',
+  email: 'dev-admin@makola.test',
+  fullName: 'Dev Admin',
+  imageUrl: null,
+  role: 'ADMIN',
+  status: 'active',
+  createdAt: new Date().toISOString(),
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(FAKE_AUTH_ENABLED ? FAKE_ADMIN_USER : null);
+  const [isLoading, setIsLoading] = useState(!FAKE_AUTH_ENABLED);
 
   // Restore the session on reload: a stored token plus /users/me.
+  // Skipped entirely in fake-auth mode - there's no real token to restore.
   useEffect(() => {
+    if (FAKE_AUTH_ENABLED) return;
+
     let cancelled = false;
 
     async function restore() {
@@ -60,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh failed anywhere in the app -> drop the user.
   useEffect(() => {
+    if (FAKE_AUTH_ENABLED) return;
     setSessionExpiredHandler(() => setUser(null));
   }, []);
 
@@ -90,6 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
+    if (FAKE_AUTH_ENABLED) {
+   
+      setUser(null);
+      return;
+    }
     await authService.logout();
     setUser(null);
   }, []);

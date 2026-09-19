@@ -91,10 +91,15 @@ const mockListingList = ({ page, limit, q }: { page: number; limit: number; q: s
 export function ListingsPage() {
   const list = useAdminList<Listing>(({ page, limit, q, tab }) => {
     if (config.devMockData) {
-      return mockListingList({ page, limit, q }).then((result) => ({
-        ...result,
-        data: tab === 'pending' ? result.data.filter((listing) => listing.status === 'pending') : result.data,
-      }));
+      const result = mockListingList({ page: 1, limit: mockListings.length, q });
+      return result.then((all) => {
+        const filtered = tab === 'pending' ? all.data.filter((listing) => listing.status === 'pending') : all.data;
+        const start = (page - 1) * limit;
+        return {
+          data: filtered.slice(start, start + limit),
+          meta: { total: filtered.length, page, limit, pages: Math.max(1, Math.ceil(filtered.length / limit)) },
+        };
+      });
     }
     return tab === 'pending'
       ? listingsService.listPending({ page, limit })
@@ -142,7 +147,11 @@ export function ListingsPage() {
       kind === 'approve'
         ? await listingsService.approve(listing.id)
         : await listingsService.reject(listing.id);
-    list.updateRows((rows) => rows.map((row) => (row.id === result.listing.id ? result.listing : row)));
+    list.updateRows((rows) =>
+      list.tab === 'pending'
+        ? rows.filter((row) => row.id !== result.listing.id)
+        : rows.map((row) => (row.id === result.listing.id ? result.listing : row)),
+    );
     setSelected((current) => (current?.id === result.listing.id ? result.listing : current));
     setNotice(result.message);
     setAction(null);
@@ -188,15 +197,7 @@ export function ListingsPage() {
       header: 'Status',
       width: '140px',
       render: (listing) => (
-        <StatusChip
-          status={
-            listing.status === 'removed'
-              ? 'Rejected'
-              : listing.status === 'approved'
-                ? 'Approved'
-                : listing.status
-          }
-        />
+        <StatusChip status={listing.status === 'approved' ? 'Approved' : listing.status} />
       ),
     },
     {

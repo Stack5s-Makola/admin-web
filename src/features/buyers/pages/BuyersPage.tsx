@@ -41,8 +41,9 @@ export function BuyersPage() {
         meta: { total: filtered.length, page, limit, pages: Math.max(1, Math.ceil(filtered.length / limit)) },
       });
     }
-    return q
-      ? usersService.search({ q, role: 'BUYER', page, limit })
+    const searchTerm = q.trim();
+    return searchTerm
+      ? usersService.search({ q: searchTerm, role: 'BUYER', page, limit })
       : usersService.listBuyers({ page, limit });
   });
 
@@ -161,6 +162,7 @@ export function BuyersPage() {
           open
           title={selected.fullName}
           subtitle={<StatusChip status={selected.status} />}
+          hideHeader
           onClose={() => setSelected(null)}
           footer={
             <div className="drawer__actions">
