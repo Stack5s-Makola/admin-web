@@ -28,6 +28,12 @@ const TONES: Record<string, Tone> = {
   BUYER: 'info',
   SELLER: 'info',
   ADMIN: 'info',
+  Verified: 'ok',
+  Active: 'ok',
+  Inactive: 'bad',
+  Approved: 'ok',
+  Pending: 'warn',
+  Rejected: 'bad',
 };
 
 function toLabel(status: string): string {

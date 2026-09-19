@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Icon } from '@iconify/react';
 import { Alert } from '../../../components/Alert';
 import { DataTable, type Column } from '../../../components/DataTable';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { StatusChip } from '../../../components/StatusChip';
-import { Thumb } from '../../../components/Thumb';
-import { formatDate } from '../../../core/format';
+import { config } from '../../../core/config';
+import { mockSellers } from '../../../data/mock/sellers';
 import { useAdminList } from '../../../hooks/useAdminList';
 import type { Seller } from '../../../types/admin';
 import { usersService } from '../../buyers/services/users.service';
@@ -27,17 +28,34 @@ type Action =
   | { kind: 'approve' | 'reject' | 'suspend' | 'reinstate'; seller: Seller }
   | null;
 
-const TABS = [
-  { value: 'all', label: 'All sellers' },
-  { value: 'pending', label: 'Pending verification' },
-];
+const mockSellerList = ({ page, limit, q }: { page: number; limit: number; q: string }) => {
+  const query = q.trim().toLowerCase();
+  const filtered = query
+    ? mockSellers.filter((seller) =>
+        `${seller.user.fullName} ${seller.businessName} Madina`.toLowerCase().includes(query),
+      )
+    : mockSellers;
+  const start = (page - 1) * limit;
+  const data = filtered.slice(start, start + limit);
+
+  return Promise.resolve({
+    data,
+    meta: { total: filtered.length, page, limit, pages: Math.max(1, Math.ceil(filtered.length / limit)) },
+  });
+};
 
 export function SellersPage() {
-  const list = useAdminList<Seller>(({ page, limit, tab }) =>
-    tab === 'pending'
+  const list = useAdminList<Seller>(({ page, limit, q, tab }) => {
+    if (config.devMockData) {
+      return mockSellerList({ page, limit, q }).then((result) => ({
+        ...result,
+        data: tab === 'pending' ? result.data.filter((seller) => seller.status === 'pending') : result.data,
+      }));
+    }
+    return tab === 'pending'
       ? sellersService.listPending({ page, limit })
-      : sellersService.list({ page, limit }),
-  );
+      : sellersService.list({ page, limit });
+  });
 
   const [selected, setSelected] = useState<Seller | null>(null);
   const [action, setAction] = useState<Action>(null);
@@ -52,6 +70,16 @@ export function SellersPage() {
   const runAction = async () => {
     if (!action) return;
     const { kind, seller } = action;
+
+    if (config.devMockData) {
+      const nextStatus = kind === 'approve' ? 'approved' : kind === 'reject' ? 'rejected' : seller.status;
+      const updated = nextStatus === seller.status ? seller : { ...seller, status: nextStatus };
+      list.updateRows((rows) => rows.map((row) => (row.id === seller.id ? updated : row)));
+      setSelected((current) => (current?.id === seller.id ? updated : current));
+      setNotice(`Seller ${kind === 'approve' ? 'approved' : kind === 'reject' ? 'rejected' : 'updated'}.`);
+      setAction(null);
+      return;
+    }
 
     if (kind === 'approve' || kind === 'reject') {
       const result =
@@ -84,85 +112,45 @@ export function SellersPage() {
 
   const columns: Column<Seller>[] = [
     {
-      key: 'business',
-      header: 'Business',
-      width: 'minmax(220px, 2fr)',
+      key: 'number',
+      header: '',
+      width: '36px',
+      render: (seller) => <span className="seller-table__number">{mockSellers.findIndex((row) => row.id === seller.id) + 1}.</span>,
+    },
+    {
+      key: 'seller',
+      header: 'Seller',
+      width: 'minmax(150px, 1fr)',
       render: (seller) => (
-        <div className="cell-media">
-          <Thumb src={seller.imageUrl} name={seller.businessName} shape="square" />
-          <span className="cell-stack">
-            <span className="cell-strong">{seller.businessName}</span>
-            <span className="cell-sub">{seller.user.fullName}</span>
-          </span>
-        </div>
+        <span className="seller-table__text">{seller.user.fullName}</span>
       ),
     },
     {
-      key: 'email',
-      header: 'Owner',
-      width: 'minmax(180px, 1.5fr)',
-      render: (seller) => <span className="cell-sub">{seller.user.email}</span>,
+      key: 'business',
+      header: 'Business Name',
+      width: 'minmax(180px, 1.35fr)',
+      render: (seller) => <span className="seller-table__text">{seller.businessName}</span>,
+    },
+    {
+      key: 'location',
+      header: 'Location',
+      width: 'minmax(140px, 1fr)',
+      render: () => <span className="seller-table__text">Madina</span>,
     },
     {
       key: 'status',
-      header: 'Verification',
+      header: 'Status',
       width: '140px',
-      render: (seller) => <StatusChip status={seller.status} />,
-    },
-    {
-      key: 'account',
-      header: 'Account',
-      width: '120px',
-      render: (seller) => <StatusChip status={seller.user.status} />,
-    },
-    {
-      key: 'created',
-      header: 'Registered',
-      width: '130px',
-      render: (seller) => <span className="cell-sub">{formatDate(seller.createdAt)}</span>,
+      render: (seller) => <StatusChip status={seller.status === 'approved' ? 'Verified' : seller.status} />,
     },
     {
       key: 'actions',
-      header: '',
-      width: '190px',
-      align: 'right',
+      header: 'Action',
+      width: '100px',
       render: (seller) => (
-        <div className="row-actions" onClick={(event) => event.stopPropagation()}>
-          {seller.status === 'pending' ? (
-            <>
-              <button
-                type="button"
-                className="button button--small button--dark"
-                onClick={() => setAction({ kind: 'approve', seller })}
-              >
-                Approve
-              </button>
-              <button
-                type="button"
-                className="button button--small button--quiet"
-                onClick={() => setAction({ kind: 'reject', seller })}
-              >
-                Reject
-              </button>
-            </>
-          ) : seller.user.status === 'suspended' ? (
-            <button
-              type="button"
-              className="button button--small button--dark"
-              onClick={() => setAction({ kind: 'reinstate', seller })}
-            >
-              Reinstate
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="button button--small button--quiet"
-              onClick={() => setAction({ kind: 'suspend', seller })}
-            >
-              Suspend
-            </button>
-          )}
-        </div>
+        <button type="button" className="seller-table__view" onClick={() => setSelected(seller)}>
+          View
+        </button>
       ),
     },
   ];
@@ -170,25 +158,24 @@ export function SellersPage() {
   const target = action?.seller;
 
   return (
-    <section className="page">
-      <header className="page__head">
-        <h1 className="page__title">Sellers</h1>
+    <section className="seller-management page">
+      <header className="seller-management__header">
+        <h1 className="seller-management__title">Seller's Management</h1>
+        <p className="seller-management__subtitle">Manage seller and their verification status</p>
+        <label className="seller-management__search">
+          <Icon icon="basil:search-outline" width={24} aria-hidden="true" />
+          <span className="sr-only">Search sellers</span>
+          <input
+            type="search"
+            placeholder="Search sellers..."
+            value={list.searchInput}
+            onChange={(event) => list.setSearch(event.target.value)}
+            aria-label="Search sellers"
+          />
+        </label>
       </header>
 
       {notice && <Alert tone="success" message={notice} />}
-
-      <nav className="tabs" aria-label="Filter sellers">
-        {TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            className={list.tab === tab.value ? 'tab tab--active' : 'tab'}
-            onClick={() => list.setTab(tab.value)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
 
       <DataTable
         columns={columns}

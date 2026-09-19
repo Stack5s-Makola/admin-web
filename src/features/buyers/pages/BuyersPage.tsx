@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Icon } from '@iconify/react';
 import { Alert } from '../../../components/Alert';
 import { ConfirmDialog } from '../../../components/ConfirmDialog';
 import { DataTable, type Column } from '../../../components/DataTable';
@@ -6,6 +7,8 @@ import { DetailRow, Drawer } from '../../../components/Drawer';
 import { StatusChip } from '../../../components/StatusChip';
 import { Thumb } from '../../../components/Thumb';
 import { formatDate } from '../../../core/format';
+import { config } from '../../../core/config';
+import { mockBuyers } from '../../../data/mock/buyers';
 import { useAdminList } from '../../../hooks/useAdminList';
 import type { User } from '../../../types/user';
 import { usersService } from '../services/users.service';
@@ -25,11 +28,23 @@ import { usersService } from '../services/users.service';
 type Action = { user: User; next: 'suspended' | 'active' } | null;
 
 export function BuyersPage() {
-  const list = useAdminList<User>(({ page, limit, q }) =>
-    q
+  const list = useAdminList<User>(({ page, limit, q }) => {
+    if (config.devMockData) {
+      const query = q.trim().toLowerCase();
+      const filtered = query
+        ? mockBuyers.filter((buyer) => `${buyer.fullName} ${buyer.email} Madina`.toLowerCase().includes(query))
+        : mockBuyers;
+      const start = (page - 1) * limit;
+      const data = filtered.slice(start, start + limit);
+      return Promise.resolve({
+        data,
+        meta: { total: filtered.length, page, limit, pages: Math.max(1, Math.ceil(filtered.length / limit)) },
+      });
+    }
+    return q
       ? usersService.search({ q, role: 'BUYER', page, limit })
-      : usersService.listBuyers({ page, limit }),
-  );
+      : usersService.listBuyers({ page, limit });
+  });
 
   const [selected, setSelected] = useState<User | null>(null);
   const [action, setAction] = useState<Action>(null);
@@ -43,6 +58,14 @@ export function BuyersPage() {
 
   const runAction = async () => {
     if (!action) return;
+    if (config.devMockData) {
+      const updated = { ...action.user, status: action.next };
+      list.updateRows((rows) => rows.map((row) => (row.id === updated.id ? updated : row)));
+      setSelected((current) => (current?.id === updated.id ? updated : current));
+      setNotice(`Buyer ${action.next === 'active' ? 'reinstated' : 'suspended'}.`);
+      setAction(null);
+      return;
+    }
     const { user, message } = await usersService.setStatus(action.user.id, action.next);
     setNotice(message);
     // The PATCH returns the updated record, so patch the row rather than refetch.
@@ -52,72 +75,69 @@ export function BuyersPage() {
 
   const columns: Column<User>[] = [
     {
-      key: 'buyer',
-      header: 'Buyer',
-      width: 'minmax(220px, 2fr)',
-      render: (user) => (
-        <div className="cell-media">
-          <Thumb src={user.imageUrl} name={user.fullName} />
-          <span className="cell-stack">
-            <span className="cell-strong">{user.fullName}</span>
-            <span className="cell-sub">{user.email}</span>
-          </span>
-        </div>
-      ),
+      key: 'number',
+      header: '',
+      width: '36px',
+      render: (user) => <span className="seller-table__number">{mockBuyers.findIndex((row) => row.id === user.id) + 1}.</span>,
     },
     {
-      key: 'status',
-      header: 'Account',
-      width: '130px',
-      render: (user) => <StatusChip status={user.status} />,
+      key: 'buyer',
+      header: 'Buyer',
+      width: 'minmax(180px, 1fr)',
+      render: (user) => <span className="seller-table__text">{user.fullName}</span>,
+    },
+    {
+      key: 'phone',
+      header: 'Phone Number',
+      width: 'minmax(220px, 1.35fr)',
+      render: () => <span className="seller-table__text">024456906</span>,
     },
     {
       key: 'joined',
       header: 'Joined',
+      width: 'minmax(140px, 1fr)',
+      render: (user) => (
+        <span className="seller-table__text">
+          {config.devMockData ? 'Sep 12,2026' : formatDate(user.createdAt)}
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
       width: '140px',
-      render: (user) => <span className="cell-sub">{formatDate(user.createdAt)}</span>,
+      render: (user) => <StatusChip status={user.status === 'active' ? 'Active' : 'Inactive'} />,
     },
     {
       key: 'actions',
-      header: '',
-      width: '150px',
-      align: 'right',
+      header: 'Action',
+      width: '100px',
       render: (user) => (
-        <div className="row-actions" onClick={(event) => event.stopPropagation()}>
-          {user.status === 'suspended' ? (
-            <button
-              type="button"
-              className="button button--small button--dark"
-              onClick={() => setAction({ user, next: 'active' })}
-            >
-              Reinstate
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="button button--small button--quiet"
-              onClick={() => setAction({ user, next: 'suspended' })}
-            >
-              Suspend
-            </button>
-          )}
-        </div>
+        <button type="button" className="seller-table__view" onClick={() => setSelected(user)}>
+          View
+        </button>
       ),
     },
   ];
 
   return (
-    <section className="page">
-      <header className="page__head">
-        <h1 className="page__title">Buyers</h1>
-        <input
-          className="search"
-          type="search"
-          placeholder="Search name or email"
+    <section className="seller-management buyer-management page">
+      <header className="seller-management__header">
+        <div>
+          <h1 className="seller-management__title">Buyer's Management</h1>
+          <p className="seller-management__subtitle">Manage buyer and their account status</p>
+        </div>
+        <label className="seller-management__search">
+          <Icon icon="basil:search-outline" width={24} aria-hidden="true" />
+          <span className="sr-only">Search buyers</span>
+          <input
+            type="search"
+            placeholder="Search buyers..."
           value={list.searchInput}
           onChange={(event) => list.setSearch(event.target.value)}
           aria-label="Search buyers"
-        />
+          />
+        </label>
       </header>
 
       {notice && <Alert tone="success" message={notice} />}
