@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert } from '../../../components/Alert';
 import { FormField } from '../../../components/FormField';
 import { paths } from '../../../routes/paths';
@@ -32,14 +32,7 @@ export function LoginPage() {
 
     setIsSubmitting(true);
     try {
-      const outcome = await login({ email: email.trim(), password });
-
-      if (outcome.status === 'otp_required') {
-        navigate(paths.verifyOtp, {
-          state: { email: outcome.email, userId: outcome.userId, next: searchParams.get('next') },
-        });
-        return;
-      }
+      await login({ email: email.trim(), password });
 
       navigate(searchParams.get('next') ?? paths.dashboard, { replace: true });
     } catch (error) {
@@ -86,10 +79,6 @@ export function LoginPage() {
         error={fieldErrors.password}
         onChange={(event) => setPassword(event.target.value)}
       />
-
-      <Link className="auth-form__link auth-form__link--inline" to={paths.forgotPassword}>
-        or forgot password?
-      </Link>
 
       <button type="submit" className="button button--dark" disabled={isSubmitting}>
         {isSubmitting ? 'Signing in…' : 'Login'}

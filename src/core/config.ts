@@ -19,11 +19,10 @@ export const config = {
    */
   refreshTokenTransport: 'body' as 'body' | 'cookie',
   /**
-   * DEV ONLY. With VITE_DEV_FAKE_AUTH=true the app signs you in as a fake
-   * admin so the screens can be clicked through before the API exists.
-   * Never set this in a deployed environment.
+   * DEV ONLY. With VITE_USE_MOCK_DATA=true the app can render mock data
+   * instead of live API responses while the design and screens are being built.
    */
-  devFakeAuth: import.meta.env.VITE_DEV_FAKE_AUTH === 'true' && import.meta.env.DEV,
+  devMockData: import.meta.env.VITE_USE_MOCK_DATA === 'true' && import.meta.env.DEV,
 } as const;
 
 export const apiUrl = `${config.apiBaseUrl}${config.apiPrefix}`;

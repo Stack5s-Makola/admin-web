@@ -1,12 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { PlaceholderPage } from '../components/PlaceholderPage';
-import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage';
 import { LoginPage } from '../features/auth/pages/LoginPage';
-import { ResetPasswordPage } from '../features/auth/pages/ResetPasswordPage';
-import { VerifyOtpPage } from '../features/auth/pages/VerifyOtpPage';
 import { BuyersPage } from '../features/buyers/pages/BuyersPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { ListingsPage } from '../features/listings/pages/ListingsPage';
+import { SettingsPage } from '../features/settings/pages/SettingsPage';
 import { SellersPage } from '../features/sellers/pages/SellersPage';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -20,9 +18,6 @@ export function AppRoutes() {
       <Route element={<PublicOnlyRoute />}>
         <Route element={<AuthLayout />}>
           <Route path={paths.login} element={<LoginPage />} />
-          <Route path={paths.verifyOtp} element={<VerifyOtpPage />} />
-          <Route path={paths.forgotPassword} element={<ForgotPasswordPage />} />
-          <Route path={paths.resetPassword} element={<ResetPasswordPage />} />
         </Route>
       </Route>
 
@@ -32,6 +27,7 @@ export function AppRoutes() {
           <Route path={paths.dashboard} element={<DashboardPage />} />
           <Route path={paths.sellers} element={<SellersPage />} />
           <Route path={paths.buyers} element={<BuyersPage />} />
+          <Route path={paths.settings} element={<SettingsPage />} />
           <Route path={paths.listings} element={<ListingsPage />} />
           <Route path={paths.listingsPending} element={<ListingsPage />} />
         </Route>

@@ -18,12 +18,10 @@ npm run dev                 # http://localhost:5173
 
 In a Codespace, port 5173 is forwarded automatically — open it from the Ports tab.
 
-### Clicking through the screens without a backend
+### Authentication
 
-Set `VITE_DEV_FAKE_AUTH=true` in `.env` and restart `npm run dev`. Any email/password
-signs you in as a fake admin, so `/dashboard`, `/sellers`, `/buyers` and `/map` are
-reachable. The flag is ignored in production builds. Leave it `false` to test the real
-login flow. `/verify-otp` is only reachable through a real login response.
+Login always validates the seeded admin credentials through the backend. Invalid email
+or password values are returned as an error on the sign-in form. OTP is not used.
 
 Scripts: `npm run dev`, `npm run build`, `npm run preview`, `npm run typecheck`.
 

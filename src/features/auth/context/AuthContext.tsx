@@ -7,7 +7,6 @@ import {
   type ReactNode,
 } from 'react';
 import { setSessionExpiredHandler } from '../../../core/axios';
-import { config } from '../../../core/config';
 import { tokenStorage } from '../../../core/storage';
 import { ApiError } from '../../../types/api';
 import type { User } from '../../../types/user';
@@ -16,7 +15,6 @@ import type {
   LoginCredentials,
   LoginOutcome,
   SessionTokens,
-  VerifyOtpPayload,
 } from '../types';
 
 interface AuthContextValue {
@@ -25,22 +23,10 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (credentials: LoginCredentials) => Promise<LoginOutcome>;
-  verifyOtp: (payload: VerifyOtpPayload) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-/** Stand-in account used only when VITE_DEV_FAKE_AUTH is on. */
-const DEV_ADMIN: User = {
-  id: 'dev-admin',
-  email: 'dev@makola.local',
-  fullName: 'Dev Admin',
-  imageUrl: null,
-  role: 'ADMIN',
-  status: 'active',
-  createdAt: new Date().toISOString(),
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -51,11 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     async function restore() {
-      if (config.devFakeAuth) {
-        setUser(DEV_ADMIN);
-        setIsLoading(false);
-        return;
-      }
       if (!tokenStorage.getAccessToken()) {
         setIsLoading(false);
         return;
@@ -82,16 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionExpiredHandler(() => setUser(null));
   }, []);
 
-  /**
-   * Stores the tokens, loads the account through GET /users/me
-   * (no endpoint returns the user alongside tokens), and rejects non-admins.
-   */
+  /** Login validates seeded backend credentials and establishes the admin session. */
   const establishSession = useCallback(async (tokens: SessionTokens) => {
-    tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
+    if (!tokens?.accessToken) {
+      throw new ApiError('Login did not return a session token.', 500);
+    }
 
+    tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
     const account = await authService.me();
 
-    // The admin app is for administrators only (architecture doc, section 58).
     if (account.role !== 'ADMIN') {
       tokenStorage.clear();
       throw new ApiError('This account does not have administrator access.', 403);
@@ -100,30 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(account);
   }, []);
 
-  /**
-   * Password check only. Every admin login sends an OTP, so this never
-   * establishes a session - the OTP screen does.
-   */
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<LoginOutcome> => {
-      if (config.devFakeAuth) {
-        setUser(DEV_ADMIN);
-        return { status: 'authenticated' };
-      }
-
-      const result = await authService.login(credentials);
-      return { status: 'otp_required', email: credentials.email, userId: result?.userId };
-    },
-    [],
-  );
-
-  const verifyOtp = useCallback(
-    async (payload: VerifyOtpPayload) => {
-      const tokens = await authService.verifyOtp(payload);
-      if (!tokens?.accessToken) {
-        throw new ApiError('Verification did not return a session. Try signing in again.', 500);
-      }
+      const tokens = await authService.login(credentials);
       await establishSession(tokens);
+      return { status: 'authenticated' };
     },
     [establishSession],
   );
@@ -134,8 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, isLoading, isAuthenticated: !!user, login, verifyOtp, logout }),
-    [user, isLoading, login, verifyOtp, logout],
+    () => ({ user, isLoading, isAuthenticated: !!user, login, logout }),
+    [user, isLoading, login, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
