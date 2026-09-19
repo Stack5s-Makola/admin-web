@@ -12,6 +12,11 @@ const listingRows = [
   ['Tomatoes', 1, 'Nkwakwaw', 'pending'],
   ['Tomatoes', 1, 'Nkwakwaw', 'rejected'],
   ['Tomatoes', 1, 'Nkwakwaw', 'rejected'],
+  ['Plantain Chips', 2, 'Accra', 'approved'],
+  ['Leather Bag', 3, 'Takoradi', 'pending'],
+  ['Solar Lamp', 4, 'Cape Coast', 'approved'],
+  ['Rice Bags', 5, 'Tamale', 'rejected'],
+  ['Handwoven Basket', 6, 'Ho', 'approved'],
 ] as const;
 
 export const mockListings: Listing[] = listingRows.map(([title, sellerIndex, location, status], index) => ({
@@ -19,7 +24,7 @@ export const mockListings: Listing[] = listingRows.map(([title, sellerIndex, loc
   title,
   imageUrl: null,
   status,
-  createdAt: new Date(Date.UTC(2026, 8, 12)).toISOString(),
+  createdAt: new Date(Date.UTC(2026, 8, 12 + index)).toISOString(),
   seller: {
     ...mockSellers[sellerIndex],
     user: { ...mockSellers[sellerIndex].user, fullName: sellerIndex === 0 ? 'Ama Mensah' : 'Esi Akoemah' },
