@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { Logo } from '../components/Logo';
 import { useAuth } from '../features/auth/hooks/useAuth';
@@ -11,6 +11,7 @@ const navItems = [
   { to: paths.sellers, label: 'Sellers', icon: 'store' },
   { to: paths.buyers, label: 'Buyers', icon: 'users' },
   { to: paths.listings, label: 'Listings', icon: 'tag' },
+  { to: paths.settings, label: 'Settings', icon: 'settings' },
 ] as const;
 
 const icons: Record<(typeof navItems)[number]['icon'], string> = {
@@ -18,6 +19,7 @@ const icons: Record<(typeof navItems)[number]['icon'], string> = {
   store: 'uil:money-withdraw',
   users: 'ci:users',
   tag: 'bx:purchase-tag',
+  settings: 'mingcute:settings-3-fill',
 };
 
 const logoutIcon = 'basil:logout-solid';
@@ -28,6 +30,7 @@ function NavIcon({ name }: { name: (typeof navItems)[number]['icon'] }) {
 
 export function AdminLayout() {
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   return (
     <div className="admin-layout">
@@ -71,6 +74,18 @@ export function AdminLayout() {
       </aside>
 
       <main className="admin-content">
+        {location.pathname === paths.dashboard && (
+          <header className="admin-topbar">
+            <label className="admin-search">
+              <Icon icon="basil:search-outline" width={24} aria-hidden="true" />
+              <span className="sr-only">Search</span>
+              <input type="search" placeholder="Search sellers..." aria-label="Search sellers" />
+            </label>
+            <button type="button" className="admin-notifications" aria-label="Notifications">
+              <Icon icon="hugeicons:notification-01" width={28} aria-hidden="true" />
+            </button>
+          </header>
+        )}
         <Outlet />
       </main>
     </div>

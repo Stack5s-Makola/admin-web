@@ -29,6 +29,17 @@
   color: var(--color-text);
 }
 
+:root[data-theme='dark'] {
+  --color-canvas: #151a19;
+  --color-surface: #202725;
+  --color-border: #34413d;
+  --color-text: #f4f7f4;
+  --color-muted: #a8b3ae;
+  --color-sidebar: #101513;
+  --color-sidebar-hover: #1e2b26;
+  --color-brand-panel: #24312d;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -36,6 +47,7 @@
 body {
   margin: 0;
   background: var(--color-canvas);
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .sr-only {
@@ -421,6 +433,24 @@ body {
   background: var(--color-accent-hover);
 }
 
+:root:not([data-theme='dark']) .admin-sidebar {
+  background: #01573c;
+}
+
+:root:not([data-theme='dark']) .admin-nav-link {
+  color: #ffffff;
+}
+
+:root:not([data-theme='dark']) .admin-nav-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+:root:not([data-theme='dark']) .admin-nav-link--active,
+:root:not([data-theme='dark']) .admin-nav-link--active:hover {
+  background: #ffffff;
+  color: #202020;
+}
+
 /*
  * Figma: sidebar 308 wide, account card 252 x 106 (radius 15) filled with the
  * marble artwork, 76px avatar centred on the card's top edge (half overlapping).
@@ -479,8 +509,14 @@ body {
 }
 
 .admin-content {
+  position: relative;
   padding: 28px;
   border-radius: var(--radius-md);
+  background: var(--color-canvas);
+  transition: background-color 180ms ease;
+}
+
+:root:not([data-theme='dark']) .admin-content {
   background: #fbf6ec;
 }
 
