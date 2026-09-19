@@ -30,11 +30,12 @@ type Action =
 
 const mockSellerList = ({ page, limit, q }: { page: number; limit: number; q: string }) => {
   const query = q.trim().toLowerCase();
-  const filtered = query
+  const matching = query
     ? mockSellers.filter((seller) =>
         `${seller.user.fullName} ${seller.businessName} Madina`.toLowerCase().includes(query),
       )
     : mockSellers;
+  const filtered = matching;
   const start = (page - 1) * limit;
   const data = filtered.slice(start, start + limit);
 
@@ -47,10 +48,15 @@ const mockSellerList = ({ page, limit, q }: { page: number; limit: number; q: st
 export function SellersPage() {
   const list = useAdminList<Seller>(({ page, limit, q, tab }) => {
     if (config.devMockData) {
-      return mockSellerList({ page, limit, q }).then((result) => ({
-        ...result,
-        data: tab === 'pending' ? result.data.filter((seller) => seller.status === 'pending') : result.data,
-      }));
+      const result = mockSellerList({ page: 1, limit: mockSellers.length, q });
+      return result.then((all) => {
+        const filtered = tab === 'pending' ? all.data.filter((seller) => seller.status === 'pending') : all.data;
+        const start = (page - 1) * limit;
+        return {
+          data: filtered.slice(start, start + limit),
+          meta: { total: filtered.length, page, limit, pages: Math.max(1, Math.ceil(filtered.length / limit)) },
+        };
+      });
     }
     return tab === 'pending'
       ? sellersService.listPending({ page, limit })
@@ -73,7 +79,13 @@ export function SellersPage() {
 
     if (config.devMockData) {
       const nextStatus = kind === 'approve' ? 'approved' : kind === 'reject' ? 'rejected' : seller.status;
-      const updated = nextStatus === seller.status ? seller : { ...seller, status: nextStatus };
+      const updated: Seller =
+        kind === 'suspend'
+          ? { ...seller, user: { ...seller.user, status: 'suspended' } }
+          : kind === 'reinstate'
+            ? { ...seller, user: { ...seller.user, status: 'active' } }
+            : { ...seller, status: nextStatus };
+
       list.updateRows((rows) => rows.map((row) => (row.id === seller.id ? updated : row)));
       setSelected((current) => (current?.id === seller.id ? updated : current));
       setNotice(`Seller ${kind === 'approve' ? 'approved' : kind === 'reject' ? 'rejected' : 'updated'}.`);
@@ -88,14 +100,13 @@ export function SellersPage() {
           : await sellersService.reject(seller.id);
 
       setNotice(result.message);
-      // On the verification queue the row no longer belongs; elsewhere it just
-      // changes status. Either way the response is the new truth - no refetch.
       list.updateRows((rows) =>
         list.tab === 'pending'
           ? rows.filter((row) => row.id !== result.seller.id)
           : rows.map((row) => (row.id === result.seller.id ? result.seller : row)),
       );
       setSelected((current) => (current?.id === result.seller.id ? result.seller : current));
+      setAction(null);
       return;
     }
 
@@ -103,11 +114,13 @@ export function SellersPage() {
       seller.user.id,
       kind === 'suspend' ? 'suspended' : 'active',
     );
+    const updatedSeller: Seller = { ...seller, user };
     setNotice(message);
     list.updateRows((rows) =>
-      rows.map((row) => (row.id === seller.id ? { ...row, user } : row)),
+      rows.map((row) => (row.id === seller.id ? updatedSeller : row)),
     );
-    setSelected((current) => (current?.id === seller.id ? { ...current, user } : current));
+    setSelected((current) => (current?.id === seller.id ? updatedSeller : current));
+    setAction(null);
   };
 
   const columns: Column<Seller>[] = [

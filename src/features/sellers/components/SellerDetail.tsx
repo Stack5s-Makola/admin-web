@@ -34,6 +34,8 @@ export function SellerDetail({
 
   const isPending = seller.status === 'pending';
   const isSuspended = seller.user.status === 'suspended';
+  const showAccountStatus = seller.status === 'approved';
+  const showReinstate = showAccountStatus && isSuspended;
 
   return (
     <Drawer
@@ -42,9 +44,10 @@ export function SellerDetail({
       subtitle={
         <span className="drawer__chips">
           <StatusChip status={seller.status} />
-          <StatusChip status={seller.user.status} />
+          {showAccountStatus && <StatusChip status={seller.user.status} />}
         </span>
       }
+      hideHeader
       onClose={onClose}
       footer={
         <div className="drawer__actions">
@@ -66,7 +69,7 @@ export function SellerDetail({
               </button>
             </>
           )}
-          {isSuspended ? (
+          {showReinstate ? (
             <button
               type="button"
               className="button button--quiet"
@@ -74,7 +77,7 @@ export function SellerDetail({
             >
               Reinstate account
             </button>
-          ) : (
+          ) : !isPending && (
             <button
               type="button"
               className="button button--quiet"
@@ -90,21 +93,21 @@ export function SellerDetail({
         <Thumb src={seller.imageUrl} name={seller.businessName} shape="square" />
       </div>
 
-      <h3 className="drawer__section">Business</h3>
       <DetailRow label="Name">{seller.businessName}</DetailRow>
       <DetailRow label="Verification">
         <StatusChip status={seller.status} />
       </DetailRow>
+      {showAccountStatus && (
+        <DetailRow label="Account">
+          <StatusChip status={seller.user.status} />
+        </DetailRow>
+      )}
       <DetailRow label="Registered">{formatDate(seller.createdAt)}</DetailRow>
 
-      <h3 className="drawer__section">Owner</h3>
-      <DetailRow label="Name">{seller.user.fullName}</DetailRow>
+      <DetailRow label="Owner">{seller.user.fullName}</DetailRow>
       <DetailRow label="Email">{seller.user.email}</DetailRow>
       <DetailRow label="Role">
         <StatusChip status={seller.user.role} />
-      </DetailRow>
-      <DetailRow label="Account">
-        <StatusChip status={seller.user.status} />
       </DetailRow>
       <DetailRow label="Joined">{formatDate(seller.user.createdAt)}</DetailRow>
     </Drawer>
