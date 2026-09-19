@@ -129,16 +129,20 @@ body {
 
 .auth-brand__name {
   margin: 0;
-  font-size: 34px;
-  font-weight: 700;
+  font-size: 80px;
+  line-height: 1;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  font-family: 'Sora', system-ui, sans-serif;
 }
 
 .auth-brand__role {
   margin: 4px 0 0;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 600;
   opacity: 0.95;
+  font-family: 'Sora', system-ui, sans-serif;
 }
 
 /*
