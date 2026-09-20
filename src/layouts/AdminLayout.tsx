@@ -60,7 +60,7 @@ export function AdminLayout() {
         */}
         <div className="admin-account">
           <div className="admin-account__card">
-            <Avatar src={user?.imageUrl} name={user?.fullName?? 'Administrator'} />
+            <Avatar name={user?.email ?? 'Administrator'} />
             <button
               type="button"
               className="button button--accent button--block admin-account__logout"
