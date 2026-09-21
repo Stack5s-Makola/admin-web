@@ -8,7 +8,7 @@ const rawBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
 export const config = {
   /** Backend origin, e.g. https://makola-api.onrender.com */
   apiBaseUrl: rawBaseUrl.replace(/\/+$/, ''),
-  /** All backend routes are prefixed with /api (architecture doc, section 44). */
+  /** Admin routes are prefixed with /api; authentication routes are at the origin. */
   apiPrefix: '/api',
   /** Render + Neon both cold-start; 15s was not enough for the first call. */
   requestTimeoutMs: 30000,

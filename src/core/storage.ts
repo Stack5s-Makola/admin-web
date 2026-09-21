@@ -14,6 +14,12 @@ import { config } from './config';
 
 const ACCESS_TOKEN_KEY = 'makola.admin.accessToken';
 const REFRESH_TOKEN_KEY = 'makola.admin.refreshToken';
+const ADMIN_KEY = 'makola.admin.identity';
+
+interface StoredAdmin {
+  email: string;
+  role: 'ADMIN';
+}
 
 export const tokenStorage = {
   getAccessToken(): string | null {
@@ -32,9 +38,26 @@ export const tokenStorage = {
     }
   },
 
+  getAdmin(): StoredAdmin | null {
+    const stored = localStorage.getItem(ADMIN_KEY);
+    if (!stored) return null;
+
+    try {
+      const admin = JSON.parse(stored) as StoredAdmin;
+      return admin.email && admin.role === 'ADMIN' ? admin : null;
+    } catch {
+      return null;
+    }
+  },
+
+  setAdmin(admin: StoredAdmin): void {
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
+  },
+
   clear(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(ADMIN_KEY);
   },
 
   /** True when a refresh attempt is worth making. */
