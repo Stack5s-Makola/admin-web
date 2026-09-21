@@ -238,12 +238,20 @@ export const httpEnvelope = {
   async get<T>(url: string, options?: AxiosRequestConfig): Promise<ApiResponse<T>> {
     return getWithRetry<T>(url, options);
   },
-  async post<T>(url: string, body?: unknown): Promise<ApiResponse<T>> {
-    const response = await api.post<ApiResponse<T>>(url, body);
+  async post<T>(
+    url: string,
+    body?: unknown,
+    options?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
+    const response = await api.post<ApiResponse<T>>(url, body, options);
     return response.data;
   },
-  async patch<T>(url: string, body?: unknown): Promise<ApiResponse<T>> {
-    const response = await api.patch<ApiResponse<T>>(url, body);
+  async patch<T>(
+    url: string,
+    body?: unknown,
+    options?: AxiosRequestConfig,
+  ): Promise<ApiResponse<T>> {
+    const response = await api.patch<ApiResponse<T>>(url, body, options);
     return response.data;
   },
 };

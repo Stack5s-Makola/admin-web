@@ -14,6 +14,7 @@ import { config } from './config';
 
 const ACCESS_TOKEN_KEY = 'makola.admin.accessToken';
 const REFRESH_TOKEN_KEY = 'makola.admin.refreshToken';
+const ADMIN_KEY = 'makola.admin.identity';
 
 export const tokenStorage = {
   getAccessToken(): string | null {
@@ -32,9 +33,30 @@ export const tokenStorage = {
     }
   },
 
+  /**
+   * The compact admin identity is cached beside the tokens so a reload
+   * restores the session without a round trip. It is typed at the call site
+   * so core/ stays free of feature types - and validated there too, because
+   * localStorage is writable by whoever is sitting at the browser.
+   */
+  getAdmin<T>(): T | null {
+    const raw = localStorage.getItem(ADMIN_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
+  },
+
+  setAdmin(admin: unknown): void {
+    localStorage.setItem(ADMIN_KEY, JSON.stringify(admin));
+  },
+
   clear(): void {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(ADMIN_KEY);
   },
 
   /** True when a refresh attempt is worth making. */
