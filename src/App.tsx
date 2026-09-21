@@ -12,5 +12,6 @@ export default function App() {
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
+    // Should route correctly
   );
 }
