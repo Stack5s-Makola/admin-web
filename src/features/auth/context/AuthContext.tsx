@@ -35,6 +35,19 @@ export const AuthContext = createContext<AuthContextValue | undefined>(undefined
 const FAKE_AUTH_ENABLED =
   import.meta.env.VITE_DEV_FAKE_AUTH === 'true' && !import.meta.env.PROD;
 
+/**
+ * The cached identity comes back from localStorage, which anyone at the
+ * browser can edit, so it is re-checked rather than trusted. A tampered or
+ * non-admin entry reads as no session at all.
+ */
+function readStoredAdmin(): AuthenticatedAdmin | null {
+  const stored = tokenStorage.getAdmin<Partial<AuthenticatedAdmin>>();
+  if (!stored || typeof stored.email !== 'string' || stored.role !== 'ADMIN') {
+    return null;
+  }
+  return { email: stored.email, role: 'ADMIN' };
+}
+
 const FAKE_ADMIN_USER: AuthenticatedAdmin = {
   email: 'dev-admin@makola.test',
   role: 'ADMIN',
@@ -58,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
         return;
       }
-      const admin = tokenStorage.getAdmin();
+      const admin = readStoredAdmin();
       if (!admin) tokenStorage.clear();
       if (!cancelled) {
         setUser(admin);
