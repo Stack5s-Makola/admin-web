@@ -9,16 +9,15 @@ import {
 import { setSessionExpiredHandler } from '../../../core/axios';
 import { tokenStorage } from '../../../core/storage';
 import { ApiError } from '../../../types/api';
-import type { User } from '../../../types/user';
 import { authService } from '../services/auth.service';
 import type {
+  AuthenticatedAdmin,
   LoginCredentials,
   LoginOutcome,
-  SessionTokens,
 } from '../types';
 
 interface AuthContextValue {
-  user: User | null;
+  user: AuthenticatedAdmin | null;
   /** True while the session is being restored on first load. */
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -28,12 +27,30 @@ interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+/**
+ * Dev-only bypass: signs in a fake admin so screens can be clicked through
+ * before the API is live. Stripped from production builds by the
+ * `!import.meta.env.PROD` guard below, on top of the env flag itself.
+ */
+const FAKE_AUTH_ENABLED =
+  import.meta.env.VITE_DEV_FAKE_AUTH === 'true' && !import.meta.env.PROD;
 
-  // Restore the session on reload: a stored token plus /users/me.
+const FAKE_ADMIN_USER: AuthenticatedAdmin = {
+  email: 'dev-admin@makola.test',
+  role: 'ADMIN',
+};
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthenticatedAdmin | null>(
+    FAKE_AUTH_ENABLED ? FAKE_ADMIN_USER : null,
+  );
+  const [isLoading, setIsLoading] = useState(!FAKE_AUTH_ENABLED);
+
+  // Restore the compact admin identity stored with the session tokens.
+  // Skipped entirely in fake-auth mode - there's no real token to restore.
   useEffect(() => {
+    if (FAKE_AUTH_ENABLED) return;
+
     let cancelled = false;
 
     async function restore() {
@@ -41,14 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
         return;
       }
-      try {
-        const me = await authService.me();
-        if (me.role !== 'ADMIN') tokenStorage.clear();
-        if (!cancelled) setUser(me.role === 'ADMIN' ? me : null);
-      } catch {
-        tokenStorage.clear();
-      } finally {
-        if (!cancelled) setIsLoading(false);
+      const admin = tokenStorage.getAdmin();
+      if (!admin) tokenStorage.clear();
+      if (!cancelled) {
+        setUser(admin);
+        setIsLoading(false);
       }
     }
 
@@ -60,36 +74,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh failed anywhere in the app -> drop the user.
   useEffect(() => {
+    if (FAKE_AUTH_ENABLED) return;
     setSessionExpiredHandler(() => setUser(null));
   }, []);
 
   /** Login validates seeded backend credentials and establishes the admin session. */
-  const establishSession = useCallback(async (tokens: SessionTokens) => {
-    if (!tokens?.accessToken) {
+  const establishSession = useCallback(async (loginResult: Awaited<ReturnType<typeof authService.login>>) => {
+    if (!loginResult?.accessToken || !loginResult.admin) {
       throw new ApiError('Login did not return a session token.', 500);
     }
 
-    tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
-    const account = await authService.me();
-
-    if (account.role !== 'ADMIN') {
+    if (loginResult.admin.role !== 'ADMIN') {
       tokenStorage.clear();
       throw new ApiError('This account does not have administrator access.', 403);
     }
 
-    setUser(account);
+    tokenStorage.setTokens(loginResult.accessToken, loginResult.refreshToken);
+    tokenStorage.setAdmin(loginResult.admin);
+    setUser(loginResult.admin);
   }, []);
 
   const login = useCallback(
     async (credentials: LoginCredentials): Promise<LoginOutcome> => {
-      const tokens = await authService.login(credentials);
-      await establishSession(tokens);
+      const loginResult = await authService.login(credentials);
+      await establishSession(loginResult);
       return { status: 'authenticated' };
     },
     [establishSession],
   );
 
   const logout = useCallback(async () => {
+    if (FAKE_AUTH_ENABLED) {
+   
+      setUser(null);
+      return;
+    }
     await authService.logout();
     setUser(null);
   }, []);

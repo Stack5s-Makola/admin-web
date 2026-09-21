@@ -1,78 +1,48 @@
-import type { User } from './user';
+/** Read-only entity shapes returned by the current Admin API. */
 
-/** Entity shapes returned by /api/admin (contract, §5). */
-
-export type SellerStatus = 'pending' | 'approved' | 'rejected';
 export type ListingStatus = 'pending' | 'approved' | 'rejected' | 'removed';
-export type ReportStatus = 'open' | 'resolved' | 'dismissed';
+
+export interface DashboardData {
+  totalUsers: number;
+  totalSellers: number;
+  totalBuyers: number;
+  totalListings: number;
+  recentActivities: RecentActivity[];
+}
+
+export type RecentActivity = {
+  id?: string;
+  message?: string;
+  type?: string;
+  createdAt?: string;
+} | string;
 
 export interface Seller {
-  id: string;
+  id?: string;
+  name: string | null;
+  email: string;
+  profilePicture: string | null;
   businessName: string;
-  imageUrl: string | null;
-  status: SellerStatus;
-  createdAt: string;
-  /** Included on every seller endpoint. */
-  user: User;
+  location: string | null;
+  status: string;
+}
+
+export interface Buyer {
+  id?: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  profilePicture: string | null;
+  joined: string;
+  status: string;
 }
 
 export interface Listing {
-  id: string;
-  title: string;
-  imageUrl: string | null;
+  id?: string;
+  product: string;
+  seller: string;
+  location: string | null;
+  date: string;
   status: ListingStatus;
-  createdAt: string;
-  /** Included on every listing endpoint. */
-  seller: Seller;
-}
-
-export interface Report {
-  id: string;
-  reason: string;
-  status: ReportStatus;
-  createdAt: string;
-  /** Included on every report endpoint. */
-  reporter: User;
-}
-
-export interface Review {
-  id: string;
-  rating: number;
-  createdAt: string;
-  author: User;
-  seller: Seller;
-}
-
-/** GET /api/admin/dashboard -> data (contract, §6.1). */
-export interface DashboardData {
-  stats: DashboardStats;
-  recent: DashboardRecent;
-}
-
-export interface DashboardStats {
-  /** All user accounts. */
-  users: number;
-  /** Users with the BUYER role. */
-  buyers: number;
-  /** Users with the SELLER role. */
-  sellerAccounts: number;
-  /** Seller profiles (a SELLER user may not have one yet). */
-  sellers: number;
-  /** Seller profiles awaiting verification. */
-  pendingSellers: number;
-  listings: number;
-  pendingListings: number;
-  /** Listings with status "approved". */
-  activeListings: number;
-  /** Open reports only. */
-  reports: number;
-}
-
-/** The 10 newest rows of each kind, newest first. No `meta` on this endpoint. */
-export interface DashboardRecent {
-  users: User[];
-  sellers: Seller[];
-  listings: Listing[];
-  reports: Report[];
-  reviews: Review[];
+  image: string | null;
 }

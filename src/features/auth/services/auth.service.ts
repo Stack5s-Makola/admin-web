@@ -1,6 +1,6 @@
 import { http, httpEnvelope } from '../../../core/axios';
+import { config } from '../../../core/config';
 import { tokenStorage } from '../../../core/storage';
-import type { User } from '../../../types/user';
 import type {
   LoginCredentials,
   LoginResult,
@@ -13,21 +13,16 @@ import type {
  */
 export const authService = {
   login(credentials: LoginCredentials): Promise<LoginResult> {
-    return http.post<LoginResult>('/auth/login', credentials);
-  },
-
-  /**
-   * GET /api/users/me loads the account after login and on page reload.
-   */
-  me(): Promise<User> {
-    return http.get<User>('/users/me');
+    return http.post<LoginResult>('/api/admin/login', credentials, authRequestOptions);
   },
 
   async logout(): Promise<void> {
     try {
-      await http.post<null>('/auth/logout', {
-        refreshToken: tokenStorage.getRefreshToken(),
-      });
+      await http.post<null>(
+        '/auth/logout',
+        { refreshToken: tokenStorage.getRefreshToken() },
+        authRequestOptions,
+      );
     } catch {
       // Signing out locally must succeed even if the call fails.
     } finally {
@@ -36,12 +31,22 @@ export const authService = {
   },
 
   async forgotPassword(email: string): Promise<string> {
-    const envelope = await httpEnvelope.post<null>('/auth/forgot-password', { email });
+    const envelope = await httpEnvelope.post<null>(
+      '/auth/forgot-password',
+      { email },
+      authRequestOptions,
+    );
     return envelope.message;
   },
 
   async resetPassword(payload: ResetPasswordPayload): Promise<string> {
-    const envelope = await httpEnvelope.post<null>('/auth/reset-password', payload);
+    const envelope = await httpEnvelope.post<null>(
+      '/auth/reset-password',
+      payload,
+      authRequestOptions,
+    );
     return envelope.message;
   },
 };
+
+const authRequestOptions = { baseURL: config.apiBaseUrl };

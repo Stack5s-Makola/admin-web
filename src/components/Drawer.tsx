@@ -12,9 +12,10 @@ interface DrawerProps {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  hideHeader?: boolean;
 }
 
-export function Drawer({ open, title, subtitle, onClose, children, footer }: DrawerProps) {
+export function Drawer({ open, title, subtitle, onClose, children, footer, hideHeader = false }: DrawerProps) {
   useEffect(() => {
     if (!open) return;
 
@@ -42,10 +43,12 @@ export function Drawer({ open, title, subtitle, onClose, children, footer }: Dra
         onClick={(event) => event.stopPropagation()}
       >
         <header className="drawer__head">
-          <div>
-            <h2 className="drawer__title">{title}</h2>
-            {subtitle && <div className="drawer__subtitle">{subtitle}</div>}
-          </div>
+          {!hideHeader && (
+            <div>
+              <h2 className="drawer__title">{title}</h2>
+              {subtitle && <div className="drawer__subtitle">{subtitle}</div>}
+            </div>
+          )}
           <button type="button" className="drawer__close" onClick={onClose} aria-label="Close">
             &times;
           </button>
